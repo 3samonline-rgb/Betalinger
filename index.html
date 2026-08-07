@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<title>Kontantbok – betalinger til leverandører</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#14170F">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --paper:#20241F;
+    --paper2:#262B24;
+    --page:#14170F;
+    --ink:#EDEAE0;
+    --ink-soft:#9BA394;
+    --pine:#4FBF93;
+    --pine-deep:#2E9C74;
+    --amber:#E0A458;
+    --line:#3A4036;
+    --danger:#E07A63;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;-webkit-text-size-adjust:100%;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--page);
+    color:var(--ink);
+    font-family:'Tajawal',sans-serif;
+    padding-bottom:60px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .num{font-family:'JetBrains Mono',monospace;}
+  .app{max-width:520px;margin:0 auto;padding:18px 14px 40px;}
+
+  header{padding:6px 4px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  header h1{font-size:22px;font-weight:900;margin:0 0 4px;letter-spacing:.2px;color:var(--ink);}
+  header p{margin:0;color:var(--ink-soft);font-size:13px;}
+  .print-btn{
+    background:var(--pine);color:#0F1210;border:none;border-radius:9px;
+    padding:10px 14px;font-size:13px;font-weight:700;white-space:nowrap;
+    display:flex;align-items:center;gap:6px;flex-shrink:0;
+  }
+  .print-btn:active{background:var(--pine-deep);}
+
+  .receipt{
+    position:relative;background:var(--paper);border-radius:4px 4px 0 0;
+    padding:22px 18px 26px;
+    box-shadow:0 1px 0 rgba(0,0,0,.2), 0 8px 24px -12px rgba(0,0,0,.6);
+    margin-bottom:28px;
+    border:1px solid var(--line);
+  }
+  .receipt::after{
+    content:'';position:absolute;left:0;right:0;bottom:-11px;height:12px;
+    background:
+      linear-gradient(-45deg, var(--page) 6px, transparent 0) 0 0,
+      linear-gradient(45deg, var(--page) 6px, transparent 0) 0 0;
+    background-size:12px 12px;background-repeat:repeat-x;
+  }
+  .receipt .eyebrow{font-size:11px;letter-spacing:1.5px;color:var(--ink-soft);text-transform:uppercase;margin-bottom:8px;}
+  .receipt .total{font-size:34px;font-weight:700;color:var(--pine);display:flex;align-items:baseline;gap:6px;}
+  .receipt .total span{font-size:16px;color:var(--ink-soft);font-weight:400;}
+  .receipt .split{display:flex;justify-content:space-between;margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);font-size:13px;}
+  .receipt .split div b{display:block;font-size:16px;margin-top:2px;color:var(--ink);}
+  .receipt .split div{color:var(--ink-soft);}
+  .receipt .warn{margin-top:14px;font-size:12px;color:var(--amber);display:none;}
+  .receipt .warn.show{display:block;}
+
+  section{margin-bottom:26px;}
+  h2{font-size:14px;font-weight:700;margin:0 0 12px;color:var(--pine);display:flex;align-items:center;gap:8px;}
+  h2::before{content:'';width:6px;height:6px;background:var(--pine);border-radius:50%;}
+  h3{font-size:13px;font-weight:700;margin:0 0 8px;color:var(--ink);}
+  .howto{font-size:13px;line-height:1.9;color:var(--ink-soft);}
+  .howto b{color:var(--ink);}
+  .howto ol{margin:6px 0 0;padding-inline-start:20px;}
+
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:0 6px 16px -12px rgba(0,0,0,.5);}
+  form.card{display:flex;flex-direction:column;gap:12px;}
+  label{font-size:12px;color:var(--ink-soft);display:block;margin-bottom:5px;}
+  input[type=text], input[type=number], input[type=date]{
+    width:100%;padding:11px 12px;border:1px solid var(--line);
+    border-radius:9px;background:var(--paper2);font-family:'Tajawal',sans-serif;
+    font-size:16px;color:var(--ink);
+    -webkit-appearance:none;appearance:none;
+    color-scheme:dark;
+  }
+  input[type=number]{font-family:'JetBrains Mono',monospace;}
+  .row2{display:flex;gap:10px;}
+  .row2 > div{flex:1;}
+  .checkline{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-soft);margin-top:-2px;}
+  .checkline input{width:18px;height:18px;}
+  button{font-family:'Tajawal',sans-serif;font-weight:700;border:none;border-radius:9px;cursor:pointer;}
+  .btn-primary{background:var(--pine);color:#0F1210;padding:14px;font-size:16px;margin-top:4px;}
+  .btn-primary:active{background:var(--pine-deep);}
+  .btn-ghost{background:transparent;color:var(--pine);border:1px solid var(--line);padding:11px;font-size:13px;}
+  .btn-ghost:active{background:var(--paper2);}
+  .btn-danger-text{background:none;border:none;color:var(--danger);font-size:13px;padding:6px 8px;}
+
+  .supplier{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;box-shadow:0 4px 12px -10px rgba(0,0,0,.5);}
+  .supplier-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;}
+  .supplier-head .name{font-weight:700;font-size:15px;color:var(--ink);}
+  .supplier-head .meta{font-size:11px;color:var(--ink-soft);margin-top:2px;}
+  .supplier-head .amount{font-size:16px;font-weight:700;color:var(--pine);}
+  .supplier-body{display:none;padding:0 16px 14px;border-top:1px dashed var(--line);}
+  .supplier-body.open{display:block;}
+  .entry-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;}
+  .entry-row:last-child{border-bottom:none;}
+  .entry-row .d{color:var(--ink-soft);font-size:12px;}
+  .entry-row .a{font-weight:600;color:var(--ink);}
+  .entry-row .note{display:block;color:var(--ink-soft);font-size:11px;}
+
+  .month-row{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line);font-size:14px;}
+  .month-row:last-child{border-bottom:none;}
+  .month-row .amount{font-weight:700;color:var(--pine);}
+
+  .backup{display:flex;gap:10px;}
+  .backup button{flex:1;}
+  .empty{color:var(--ink-soft);font-size:13px;text-align:center;padding:20px 0;}
+  input[type=file]{display:none;}
+  .status-msg{font-size:12px;margin-top:8px;color:var(--pine);display:none;}
+  .status-msg.show{display:block;}
+  .status-msg.err{color:var(--danger);}
+
+  .print-only{display:none;}
+
+  @media print{
+    @page{ size:A4; margin:14mm 12mm; }
+    body{background:#fff;color:#000;padding:0;}
+    .app{max-width:none;padding:0;}
+    .no-print{display:none !important;}
+    .print-only{display:block;}
+    .receipt{box-shadow:none;border:1px solid #999;background:#fff;break-inside:avoid;}
+    .receipt::after{display:none;}
+    .receipt .total, .receipt .eyebrow, .receipt .split div, .receipt .split div b{color:#000 !important;}
+    .card{box-shadow:none;border:1px solid #ccc;background:#fff;}
+    .supplier{box-shadow:none;border:1px solid #ccc;background:#fff;break-inside:avoid;margin-bottom:8px;}
+    .supplier-body{display:block !important;}
+    .supplier-head .name, .entry-row .a, .entry-row .d{color:#000 !important;}
+    h2, h2::before{color:#000 !important;background:#000 !important;}
+    .total, .amount, .month-row .amount{color:#000 !important;}
+    .month-row{color:#000;}
+    .print-header{display:block;margin-bottom:16px;}
+    .print-header h1{font-size:20px;margin:0 0 4px;color:#000;}
+    .print-header p{margin:0;color:#555;font-size:12px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="print-only print-header">
+    <h1>Kontantbok – leverandørbetalinger</h1>
+    <p id="printDate"></p>
+  </div>
+
+  <header>
+    <div>
+      <h1>Kontantbok</h1>
+      <p>Registrer kontantbetalinger til leverandører – summeres automatisk</p>
+    </div>
+    <button class="print-btn no-print" id="printBtn">🖨 Skriv ut</button>
+  </header>
+
+  <section class="no-print">
+    <h2>Slik fungerer appen</h2>
+    <div class="card howto">
+      <b>Alt lagres automatisk</b> på denne telefonen hver gang du legger til en betaling – ingen "lagre"-knapp å huske på.
+      <ol>
+        <li>Fyll ut skjemaet under for hver betaling: leverandør, beløp og dato (eller kryss av "vet ikke datoen").</li>
+        <li>Kortet øverst viser totalsummen med det samme.</li>
+        <li>Under "Per leverandør" kan du trykke på et navn for å se alle betalingene til akkurat den leverandøren.</li>
+        <li>Under "Per måned" ser du hvor mye som gikk ut hver måned.</li>
+        <li>Har du gamle data på PC-en? Last ned Excel-malen under, fyll den ut, og last den opp – da legges alt inn på én gang.</li>
+        <li>Trykk "Skriv ut" for en ryddig A4-rapport du kan skrive ut eller lagre som PDF.</li>
+      </ol>
+    </div>
+  </section>
+
+  <div class="receipt">
+    <div class="eyebrow">Totalt utbetalt kontant</div>
+    <div class="total" id="grandTotal">0<span>kr</span></div>
+    <div class="split">
+      <div>Antall betalinger<b id="countAll">0</b></div>
+      <div>Antall leverandører<b id="countSuppliers">0</b></div>
+      <div>Uten dato<b id="undatedTotal" class="num">0 kr</b></div>
+    </div>
+    <div class="warn" id="undatedWarn">⚠ Enkelte betalinger mangler dato. De telles i totalsummen, men vises ikke i månedsoversikten</div>
+  </div>
+
+  <section class="no-print">
+    <h2>Legg til betaling</h2>
+    <form class="card" id="addForm">
+      <div>
+        <label for="supplier">Leverandørnavn</label>
+        <input type="text" id="supplier" list="supplierList" placeholder="F.eks. grønnsaksleverandør" required>
+        <datalist id="supplierList"></datalist>
+      </div>
+      <div class="row2">
+        <div>
+          <label for="amount">Beløp (kr)</label>
+          <input type="number" id="amount" min="0" step="1" placeholder="0" required inputmode="decimal">
+        </div>
+        <div>
+          <label for="date">Dato</label>
+          <input type="date" id="date">
+        </div>
+      </div>
+      <div class="checkline">
+        <input type="checkbox" id="noDate">
+        <label for="noDate" style="margin:0;">Vet ikke datoen</label>
+      </div>
+      <div>
+        <label for="note">Notat (valgfritt)</label>
+        <input type="text" id="note" placeholder="F.eks. delbetaling på juni-faktura">
+      </div>
+      <button type="submit" class="btn-primary">Legg til betaling</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Per leverandør</h2>
+    <div id="supplierList2"></div>
+  </section>
+
+  <section>
+    <h2>Per måned</h2>
+    <div class="card" id="monthCard"></div>
+  </section>
+
+  <section class="no-print">
+    <h2>Gamle data fra PC</h2>
+    <div class="card">
+      <h3>1. Last ned malen</h3>
+      <p class="howto" style="margin:0 0 10px;">Åpne den på PC i Excel eller Numbers, slett eksempelraden, og fyll inn dine gamle betalinger – én rad per betaling.</p>
+      <button class="btn-ghost" id="downloadTemplateBtn" style="width:100%;margin-bottom:16px;">⬇ Last ned mal (Excel)</button>
+      <h3>2. Last opp filen igjen</h3>
+      <p class="howto" style="margin:0 0 10px;">Når malen er utfylt, last den opp her (.xlsx eller .csv) – alle rader legges automatisk til i appen.</p>
+      <button class="btn-ghost" id="importTemplateBtn" style="width:100%;">⬆ Last opp gammel data</button>
+      <input type="file" id="importTemplateFile" accept=".xlsx,.xls,.csv">
+      <div class="status-msg" id="importStatus"></div>
+    </div>
+  </section>
+
+  <section class="no-print">
+    <h2>Sikkerhetskopi</h2>
+    <div class="backup">
+      <button class="btn-ghost" id="exportBtn">Eksporter CSV</button>
+      <button class="btn-ghost" id="exportJsonBtn">Eksporter full kopi</button>
+    </div>
+    <div class="backup" style="margin-top:8px;">
+      <button class="btn-ghost" id="importBtn">Importer kopi (JSON)</button>
+      <input type="file" id="importFile" accept="application/json">
+    </div>
+  </section>
+
+</div>
+
+<script>
+const KEY = 'kb_entries';
+let entries = [];
+let openSupplier = null;
+
+const monthsNo = ['januar','februar','mars','april','mai','juni','juli','august','september','oktober','november','desember'];
+
+async function loadEntries(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    entries = raw ? JSON.parse(raw) : [];
+  }catch(e){
+    entries = [];
+  }
+}
+async function saveEntries(){
+  try{
+    localStorage.setItem(KEY, JSON.stringify(entries));
+  }catch(e){
+    console.error('Kunne ikke lagre', e);
+    alert('Lagring feilet. Telefonens lagringsplass kan være full.');
+  }
+}
+
+function fmt(n){
+  return Math.round(n).toLocaleString('nb-NO');
+}
+
+function render(){
+  const total = entries.reduce((s,e)=>s+Number(e.amount),0);
+  document.getElementById('grandTotal').innerHTML = fmt(total) + '<span>kr</span>';
+  document.getElementById('countAll').textContent = entries.length;
+
+  const undated = entries.filter(e=>!e.date);
+  const undatedTotal = undated.reduce((s,e)=>s+Number(e.amount),0);
+  document.getElementById('undatedTotal').textContent = fmt(undatedTotal) + ' kr';
+  document.getElementById('undatedWarn').classList.toggle('show', undated.length>0);
+
+  const bySupplier = {};
+  entries.forEach(e=>{
+    if(!bySupplier[e.supplier]) bySupplier[e.supplier] = [];
+    bySupplier[e.supplier].push(e);
+  });
+  const supplierNames = Object.keys(bySupplier).sort((a,b)=>{
+    const ta = bySupplier[a].reduce((s,e)=>s+Number(e.amount),0);
+    const tb = bySupplier[b].reduce((s,e)=>s+Number(e.amount),0);
+    return tb-ta;
+  });
+  document.getElementById('countSuppliers').textContent = supplierNames.length;
+
+  const dl = document.getElementById('supplierList');
+  dl.innerHTML = supplierNames.map(n=>`<option value="${escapeHtml(n)}">`).join('');
+
+  const cont = document.getElementById('supplierList2');
+  if(supplierNames.length===0){
+    cont.innerHTML = '<div class="empty">Ingen betalinger registrert ennå</div>';
+  } else {
+    cont.innerHTML = supplierNames.map(name=>{
+      const list = bySupplier[name].slice().sort((a,b)=>(b.date||'0').localeCompare(a.date||'0'));
+      const sTotal = list.reduce((s,e)=>s+Number(e.amount),0);
+      const isOpen = openSupplier===name;
+      const rows = list.map(e=>`
+        <div class="entry-row">
+          <div>
+            <span class="d">${e.date ? formatDate(e.date) : 'Uten dato'}</span>
+            ${e.note ? `<span class="note">${escapeHtml(e.note)}</span>` : ''}
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="a num">${fmt(e.amount)} kr</span>
+            <button class="btn-danger-text no-print" onclick="deleteEntry('${e.id}')">Slett</button>
+          </div>
+        </div>`).join('');
+      return `
+        <div class="supplier">
+          <div class="supplier-head" onclick="toggleSupplier('${escapeAttr(name)}')">
+            <div>
+              <div class="name">${escapeHtml(name)}</div>
+              <div class="meta">${list.length} betaling(er)</div>
+            </div>
+            <div class="amount num">${fmt(sTotal)} kr</div>
+          </div>
+          <div class="supplier-body ${isOpen?'open':''}">${rows}</div>
+        </div>`;
+    }).join('');
+  }
+
+  const byMonth = {};
+  entries.filter(e=>e.date).forEach(e=>{
+    const key = e.date.slice(0,7);
+    byMonth[key] = (byMonth[key]||0) + Number(e.amount);
+  });
+  const monthKeys = Object.keys(byMonth).sort().reverse();
+  const monthCard = document.getElementById('monthCard');
+  if(monthKeys.length===0){
+    monthCard.innerHTML = '<div class="empty">Ingen betalinger med kjent dato ennå</div>';
+  } else {
+    monthCard.innerHTML = monthKeys.map(k=>{
+      const [y,m] = k.split('-');
+      const label = monthsNo[parseInt(m,10)-1] + ' ' + y;
+      return `<div class="month-row"><span>${label}</span><span class="amount num">${fmt(byMonth[k])} kr</span></div>`;
+    }).join('');
+  }
+}
+
+function formatDate(d){
+  const [y,m,day] = d.split('-');
+  return `${day}.${m}.${y}`;
+}
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s){ return s.replace(/'/g,"\\'"); }
+
+window.toggleSupplier = function(name){
+  openSupplier = openSupplier===name ? null : name;
+  render();
+};
+
+window.deleteEntry = async function(id){
+  if(!confirm('Slette denne betalingen?')) return;
+  entries = entries.filter(e=>e.id!==id);
+  await saveEntries();
+  render();
+};
+
+document.getElementById('noDate').addEventListener('change', (e)=>{
+  const dateInput = document.getElementById('date');
+  dateInput.disabled = e.target.checked;
+  if(e.target.checked) dateInput.value = '';
+});
+
+document.getElementById('addForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const supplier = document.getElementById('supplier').value.trim();
+  const amount = document.getElementById('amount').value;
+  const noDate = document.getElementById('noDate').checked;
+  const date = noDate ? '' : document.getElementById('date').value;
+  const note = document.getElementById('note').value.trim();
+  if(!supplier || !amount || Number(amount)<=0) return;
+
+  entries.push({
+    id: Date.now().toString(36)+Math.random().toString(36).slice(2,7),
+    supplier, amount: Number(amount), date, note
+  });
+  await saveEntries();
+  e.target.reset();
+  document.getElementById('date').disabled = false;
+  render();
+});
+
+document.getElementById('printBtn').addEventListener('click', ()=>{
+  window.print();
+});
+
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+  let csv = 'Leverandor;Belop;Dato;Notat\n';
+  entries.forEach(e=>{
+    csv += `${e.supplier};${e.amount};${e.date||''};${(e.note||'').replace(/;/g,',')}\n`;
+  });
+  downloadFile(csv, 'leverandorbetalinger.csv', 'text/csv;charset=utf-8;');
+});
+
+document.getElementById('exportJsonBtn').addEventListener('click', ()=>{
+  downloadFile(JSON.stringify(entries,null,2), 'kontantbok-sikkerhetskopi.json', 'application/json');
+});
+
+function downloadFile(content, filename, type){
+  const blob = new Blob(['\ufeff'+content], {type});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// --- JSON backup import ---
+document.getElementById('importBtn').addEventListener('click', ()=>{
+  document.getElementById('importFile').click();
+});
+document.getElementById('importFile').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async (ev)=>{
+    try{
+      const imported = JSON.parse(ev.target.result);
+      if(!Array.isArray(imported)) throw new Error('Ugyldig format');
+      if(confirm(`${imported.length} betaling(er) vil bli lagt til i gjeldende register. Fortsette?`)){
+        entries = entries.concat(imported);
+        await saveEntries();
+        render();
+      }
+    }catch(err){
+      alert('Kunne ikke lese filen. Sjekk at det er en gyldig sikkerhetskopi.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+// --- Excel/CSV template download ---
+document.getElementById('downloadTemplateBtn').addEventListener('click', ()=>{
+  const wb = XLSX.utils.book_new();
+  const data = [
+    ["Leverandør","Beløp (kr)","Dato (DD.MM.ÅÅÅÅ)","Notat"],
+    ["Eksempel: Grønnsakleverandør AS", 2500, "15.06.2025", "Slett denne raden før utfylling"]
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  ws['!cols'] = [{wch:30},{wch:14},{wch:20},{wch:40}];
+  XLSX.utils.book_append_sheet(wb, ws, "Betalinger");
+  XLSX.writeFile(wb, "mal-kontantbok.xlsx");
+});
+
+// --- Excel/CSV template import ---
+document.getElementById('importTemplateBtn').addEventListener('click', ()=>{
+  document.getElementById('importTemplateFile').click();
+});
+
+function parseDateCell(val){
+  if(val===undefined || val===null || val==='') return '';
+  if(val instanceof Date && !isNaN(val)){
+    const y=val.getFullYear(), m=String(val.getMonth()+1).padStart(2,'0'), d=String(val.getDate()).padStart(2,'0');
+    return `${y}-${m}-${d}`;
+  }
+  const s = String(val).trim();
+  let m = s.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/);
+  if(m){
+    return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  }
+  m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if(m){
+    return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+  }
+  return '';
+}
+
+document.getElementById('importTemplateFile').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const statusEl = document.getElementById('importStatus');
+  statusEl.className = 'status-msg show';
+  statusEl.textContent = 'Leser filen...';
+
+  const reader = new FileReader();
+  reader.onload = async (ev)=>{
+    try{
+      const data = new Uint8Array(ev.target.result);
+      const wb = XLSX.read(data, {type:'array', cellDates:true});
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, {header:1, raw:true, defval:''});
+
+      const newEntries = [];
+      let skipped = 0;
+      for(let i=1; i<rows.length; i++){ // skip header row
+        const row = rows[i];
+        if(!row || row.length===0) continue;
+        const supplier = String(row[0]||'').trim();
+        const amountRaw = row[1];
+        const dateRaw = row[2];
+        const note = String(row[3]||'').trim();
+
+        if(!supplier || supplier.toLowerCase().startsWith('eksempel')) { continue; }
+        const amount = Number(String(amountRaw).replace(',', '.').replace(/\s/g,''));
+        if(!amount || amount<=0){ skipped++; continue; }
+
+        newEntries.push({
+          id: Date.now().toString(36)+Math.random().toString(36).slice(2,7)+i,
+          supplier, amount, date: parseDateCell(dateRaw), note
+        });
+      }
+
+      if(newEntries.length===0){
+        statusEl.className = 'status-msg show err';
+        statusEl.textContent = 'Fant ingen gyldige rader i filen. Sjekk at beløp-kolonnen er fylt ut.';
+        return;
+      }
+
+      if(confirm(`${newEntries.length} betaling(er) funnet${skipped?` (${skipped} rader hoppet over pga. manglende beløp)`:''}. Legge til i Kontantbok?`)){
+        entries = entries.concat(newEntries);
+        await saveEntries();
+        render();
+        statusEl.className = 'status-msg show';
+        statusEl.textContent = `✓ ${newEntries.length} betaling(er) lagt til.`;
+      } else {
+        statusEl.className = 'status-msg';
+      }
+    }catch(err){
+      statusEl.className = 'status-msg show err';
+      statusEl.textContent = 'Kunne ikke lese filen. Sjekk at det er en gyldig Excel- eller CSV-fil.';
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  e.target.value = '';
+});
+
+(async function init(){
+  document.getElementById('printDate').textContent = 'Skrevet ut: ' + new Date().toLocaleDateString('nb-NO');
+  await loadEntries();
+  render();
+})();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
