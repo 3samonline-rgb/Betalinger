@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kontantbok-v1';
+const CACHE_NAME = 'kontantbok-v2';
 const CORE_ASSETS = [
   './',
   './index.html',
