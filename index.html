@@ -102,8 +102,16 @@
   .btn-ghost:active{background:var(--paper2);}
   .btn-danger-text{background:none;border:none;color:var(--danger);font-size:13px;padding:6px 8px;}
 
+  .print-tools{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .print-tools .hint{font-size:12px;color:var(--ink-soft);}
+  .print-tools .links{display:flex;gap:14px;}
+  .print-tools .links button{background:none;border:none;color:var(--pine);font-size:12px;font-weight:700;padding:0;}
+
   .supplier{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;box-shadow:0 4px 12px -10px rgba(0,0,0,.5);}
-  .supplier-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;}
+  .supplier-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;gap:10px;}
+  .supplier-head .check{flex-shrink:0;}
+  .print-check{width:20px;height:20px;accent-color:var(--pine);}
+  .supplier.excluded{opacity:.45;}
   .supplier-head .name{font-weight:700;font-size:15px;color:var(--ink);}
   .supplier-head .meta{font-size:11px;color:var(--ink-soft);margin-top:2px;}
   .supplier-head .amount{font-size:16px;font-weight:700;color:var(--pine);}
@@ -140,6 +148,8 @@
     .receipt .total, .receipt .eyebrow, .receipt .split div, .receipt .split div b{color:#000 !important;}
     .card{box-shadow:none;border:1px solid #ccc;background:#fff;}
     .supplier{box-shadow:none;border:1px solid #ccc;background:#fff;break-inside:avoid;margin-bottom:8px;}
+    .supplier.excluded{display:none !important;}
+    .print-selected-summary{display:block !important;margin:0 0 16px;font-size:12px;color:#555;border:1px solid #ccc;border-radius:6px;padding:10px 12px;}
     .supplier-body{display:block !important;}
     .supplier-head .name, .entry-row .a, .entry-row .d{color:#000 !important;}
     h2, h2::before{color:#000 !important;background:#000 !important;}
@@ -166,21 +176,6 @@
     </div>
     <button class="print-btn no-print" id="printBtn">🖨 Skriv ut</button>
   </header>
-
-  <section class="no-print">
-    <h2>Slik fungerer appen</h2>
-    <div class="card howto">
-      <b>Alt lagres automatisk</b> på denne telefonen hver gang du legger til en betaling – ingen "lagre"-knapp å huske på.
-      <ol>
-        <li>Fyll ut skjemaet under for hver betaling: leverandør, beløp og dato (eller kryss av "vet ikke datoen").</li>
-        <li>Kortet øverst viser totalsummen med det samme.</li>
-        <li>Under "Per leverandør" kan du trykke på et navn for å se alle betalingene til akkurat den leverandøren.</li>
-        <li>Under "Per måned" ser du hvor mye som gikk ut hver måned.</li>
-        <li>Har du gamle data på PC-en? Last ned Excel-malen under, fyll den ut, og last den opp – da legges alt inn på én gang.</li>
-        <li>Trykk "Skriv ut" for en ryddig A4-rapport du kan skrive ut eller lagre som PDF.</li>
-      </ol>
-    </div>
-  </section>
 
   <div class="receipt">
     <div class="eyebrow">Totalt utbetalt kontant</div>
@@ -225,6 +220,14 @@
 
   <section>
     <h2>Per leverandør</h2>
+    <div class="print-tools no-print">
+      <span class="hint">Huk av hvem som skal med i utskriften</span>
+      <span class="links">
+        <button type="button" id="selectAllBtn">Velg alle</button>
+        <button type="button" id="selectNoneBtn">Ingen</button>
+      </span>
+    </div>
+    <div class="print-only print-selected-summary" id="printSelectedSummary"></div>
     <div id="supplierList2"></div>
   </section>
 
@@ -265,6 +268,7 @@
 const KEY = 'kb_entries';
 let entries = [];
 let openSupplier = null;
+let printSelected = null; // Set of supplier names included in print; null = not yet initialized
 
 const monthsNo = ['januar','februar','mars','april','mai','juni','juli','august','september','oktober','november','desember'];
 
@@ -311,6 +315,15 @@ function render(){
   });
   document.getElementById('countSuppliers').textContent = supplierNames.length;
 
+  // initialize / prune print selection to current supplier set
+  if(printSelected===null){
+    printSelected = new Set(supplierNames);
+  } else {
+    const pruned = new Set([...printSelected].filter(n=>supplierNames.includes(n)));
+    supplierNames.forEach(n=>{ if(!printSelected.has(n) && !pruned.has(n)) pruned.add(n); }); // new suppliers default to selected
+    printSelected = pruned;
+  }
+
   const dl = document.getElementById('supplierList');
   dl.innerHTML = supplierNames.map(n=>`<option value="${escapeHtml(n)}">`).join('');
 
@@ -322,6 +335,7 @@ function render(){
       const list = bySupplier[name].slice().sort((a,b)=>(b.date||'0').localeCompare(a.date||'0'));
       const sTotal = list.reduce((s,e)=>s+Number(e.amount),0);
       const isOpen = openSupplier===name;
+      const isChecked = printSelected.has(name);
       const rows = list.map(e=>`
         <div class="entry-row">
           <div>
@@ -334,17 +348,28 @@ function render(){
           </div>
         </div>`).join('');
       return `
-        <div class="supplier">
-          <div class="supplier-head" onclick="toggleSupplier('${escapeAttr(name)}')">
-            <div>
+        <div class="supplier ${isChecked?'':'excluded'}">
+          <div class="supplier-head">
+            <input type="checkbox" class="print-check no-print check" ${isChecked?'checked':''} onclick="event.stopPropagation(); togglePrintSelect('${escapeAttr(name)}')">
+            <div style="flex:1;cursor:pointer;" onclick="toggleSupplier('${escapeAttr(name)}')">
               <div class="name">${escapeHtml(name)}</div>
               <div class="meta">${list.length} betaling(er)</div>
             </div>
-            <div class="amount num">${fmt(sTotal)} kr</div>
+            <div class="amount num" style="cursor:pointer;" onclick="toggleSupplier('${escapeAttr(name)}')">${fmt(sTotal)} kr</div>
           </div>
           <div class="supplier-body ${isOpen?'open':''}">${rows}</div>
         </div>`;
     }).join('');
+  }
+
+  // print-only summary reflecting current selection
+  const selectedEntries = entries.filter(e=>printSelected.has(e.supplier));
+  const selectedTotal = selectedEntries.reduce((s,e)=>s+Number(e.amount),0);
+  const summaryEl = document.getElementById('printSelectedSummary');
+  if(printSelected.size===supplierNames.length){
+    summaryEl.textContent = `Utskrift: alle leverandører – sum ${fmt(selectedTotal)} kr`;
+  } else {
+    summaryEl.textContent = `Utskrift: ${printSelected.size} av ${supplierNames.length} leverandører valgt – sum ${fmt(selectedTotal)} kr`;
   }
 
   const byMonth = {};
@@ -378,6 +403,21 @@ window.toggleSupplier = function(name){
   openSupplier = openSupplier===name ? null : name;
   render();
 };
+
+window.togglePrintSelect = function(name){
+  if(printSelected.has(name)) printSelected.delete(name);
+  else printSelected.add(name);
+  render();
+};
+
+document.getElementById('selectAllBtn').addEventListener('click', ()=>{
+  printSelected = new Set(Object.keys(entries.reduce((acc,e)=>{acc[e.supplier]=1;return acc;},{})));
+  render();
+});
+document.getElementById('selectNoneBtn').addEventListener('click', ()=>{
+  printSelected = new Set();
+  render();
+});
 
 window.deleteEntry = async function(id){
   if(!confirm('Slette denne betalingen?')) return;
