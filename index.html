@@ -11,58 +11,23 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
-    --paper:#20241F;
-    --paper2:#262B24;
-    --page:#14170F;
-    --ink:#EDEAE0;
-    --ink-soft:#9BA394;
-    --pine:#4FBF93;
-    --pine-deep:#2E9C74;
-    --amber:#E0A458;
-    --line:#3A4036;
-    --danger:#E07A63;
-    --radius:14px;
+    --paper:#20241F;--paper2:#262B24;--page:#14170F;--ink:#EDEAE0;--ink-soft:#9BA394;
+    --pine:#4FBF93;--pine-deep:#2E9C74;--amber:#E0A458;--line:#3A4036;--danger:#E07A63;--radius:14px;
   }
   *{box-sizing:border-box;-webkit-text-size-adjust:100%;}
-  html{-webkit-text-size-adjust:100%;}
-  body{
-    margin:0;
-    background:var(--page);
-    color:var(--ink);
-    font-family:'Tajawal',sans-serif;
-    padding-bottom:60px;
-    -webkit-tap-highlight-color:transparent;
-  }
+  body{margin:0;background:var(--page);color:var(--ink);font-family:'Tajawal',sans-serif;padding-bottom:60px;-webkit-tap-highlight-color:transparent;}
   .num{font-family:'JetBrains Mono',monospace;}
   .app{max-width:520px;margin:0 auto;padding:18px 14px 40px;}
 
   header{padding:6px 4px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
-  header h1{font-size:22px;font-weight:900;margin:0 0 4px;letter-spacing:.2px;color:var(--ink);}
+  header h1{font-size:22px;font-weight:900;margin:0 0 4px;color:var(--ink);}
   header p{margin:0;color:var(--ink-soft);font-size:13px;}
-  .print-btn{
-    background:var(--pine);color:#0F1210;border:none;border-radius:9px;
-    padding:10px 14px;font-size:13px;font-weight:700;white-space:nowrap;
-    display:flex;align-items:center;gap:6px;flex-shrink:0;
-  }
-  .print-btn:active{background:var(--pine-deep);}
+  .print-btn{background:var(--pine);color:#0F1210;border:none;border-radius:9px;padding:12px 16px;font-size:14px;font-weight:700;white-space:nowrap;flex-shrink:0;font-family:'Tajawal',sans-serif;}
 
-  .receipt{
-    position:relative;background:var(--paper);border-radius:4px 4px 0 0;
-    padding:22px 18px 26px;
-    box-shadow:0 1px 0 rgba(0,0,0,.2), 0 8px 24px -12px rgba(0,0,0,.6);
-    margin-bottom:28px;
-    border:1px solid var(--line);
-  }
-  .receipt::after{
-    content:'';position:absolute;left:0;right:0;bottom:-11px;height:12px;
-    background:
-      linear-gradient(-45deg, var(--page) 6px, transparent 0) 0 0,
-      linear-gradient(45deg, var(--page) 6px, transparent 0) 0 0;
-    background-size:12px 12px;background-repeat:repeat-x;
-  }
+  .receipt{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:4px 4px 0 0;padding:22px 18px 26px;margin-bottom:28px;}
+  .receipt::after{content:'';position:absolute;left:0;right:0;bottom:-11px;height:12px;background:linear-gradient(-45deg, var(--page) 6px, transparent 0) 0 0,linear-gradient(45deg, var(--page) 6px, transparent 0) 0 0;background-size:12px 12px;background-repeat:repeat-x;}
   .receipt .eyebrow{font-size:11px;letter-spacing:1.5px;color:var(--ink-soft);text-transform:uppercase;margin-bottom:8px;}
   .receipt .total{font-size:34px;font-weight:700;color:var(--pine);display:flex;align-items:baseline;gap:6px;}
   .receipt .total span{font-size:16px;color:var(--ink-soft);font-weight:400;}
@@ -75,46 +40,34 @@
   section{margin-bottom:26px;}
   h2{font-size:14px;font-weight:700;margin:0 0 12px;color:var(--pine);display:flex;align-items:center;gap:8px;}
   h2::before{content:'';width:6px;height:6px;background:var(--pine);border-radius:50%;}
-  h3{font-size:13px;font-weight:700;margin:0 0 8px;color:var(--ink);}
-  .howto{font-size:13px;line-height:1.9;color:var(--ink-soft);}
-  .howto b{color:var(--ink);}
-  .howto ol{margin:6px 0 0;padding-inline-start:20px;}
 
-  .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:0 6px 16px -12px rgba(0,0,0,.5);}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:16px;}
   form.card{display:flex;flex-direction:column;gap:12px;}
   label{font-size:12px;color:var(--ink-soft);display:block;margin-bottom:5px;}
-  input[type=text], input[type=number], input[type=date]{
-    width:100%;padding:11px 12px;border:1px solid var(--line);
-    border-radius:9px;background:var(--paper2);font-family:'Tajawal',sans-serif;
-    font-size:16px;color:var(--ink);
-    -webkit-appearance:none;appearance:none;
-    color-scheme:dark;
-  }
+  input[type=text],input[type=number],input[type=date]{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:var(--paper2);font-family:'Tajawal',sans-serif;font-size:16px;color:var(--ink);-webkit-appearance:none;appearance:none;color-scheme:dark;}
   input[type=number]{font-family:'JetBrains Mono',monospace;}
   .row2{display:flex;gap:10px;}
-  .row2 > div{flex:1;}
+  .row2>div{flex:1;}
   .checkline{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-soft);margin-top:-2px;}
   .checkline input{width:18px;height:18px;}
   button{font-family:'Tajawal',sans-serif;font-weight:700;border:none;border-radius:9px;cursor:pointer;}
-  .btn-primary{background:var(--pine);color:#0F1210;padding:14px;font-size:16px;margin-top:4px;}
-  .btn-primary:active{background:var(--pine-deep);}
+  .btn-primary{background:var(--pine);color:#0F1210;padding:14px;font-size:16px;margin-top:4px;width:100%;}
   .btn-ghost{background:transparent;color:var(--pine);border:1px solid var(--line);padding:11px;font-size:13px;}
-  .btn-ghost:active{background:var(--paper2);}
   .btn-danger-text{background:none;border:none;color:var(--danger);font-size:13px;padding:6px 8px;}
 
   .print-tools{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
   .print-tools .hint{font-size:12px;color:var(--ink-soft);}
   .print-tools .links{display:flex;gap:14px;}
-  .print-tools .links button{background:none;border:none;color:var(--pine);font-size:12px;font-weight:700;padding:0;}
+  .print-tools .links button{background:none;border:none;color:var(--pine);font-size:13px;font-weight:700;padding:6px 4px;font-family:'Tajawal',sans-serif;}
 
-  .supplier{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;box-shadow:0 4px 12px -10px rgba(0,0,0,.5);}
-  .supplier-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;gap:10px;}
-  .supplier-head .check{flex-shrink:0;}
-  .print-check{width:20px;height:20px;accent-color:var(--pine);}
-  .supplier.excluded{opacity:.45;}
+  .supplier{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;}
+  .supplier-head{display:flex;align-items:center;gap:10px;padding:14px 16px;}
   .supplier-head .name{font-weight:700;font-size:15px;color:var(--ink);}
   .supplier-head .meta{font-size:11px;color:var(--ink-soft);margin-top:2px;}
   .supplier-head .amount{font-size:16px;font-weight:700;color:var(--pine);}
+  .supplier-head .toggle-area{flex:1;cursor:pointer;}
+  .print-check{width:22px;height:22px;flex-shrink:0;accent-color:var(--pine);}
+  .supplier.excluded{opacity:.4;}
   .supplier-body{display:none;padding:0 16px 14px;border-top:1px dashed var(--line);}
   .supplier-body.open{display:block;}
   .entry-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;}
@@ -134,30 +87,36 @@
   .status-msg{font-size:12px;margin-top:8px;color:var(--pine);display:none;}
   .status-msg.show{display:block;}
   .status-msg.err{color:var(--danger);}
-
   .print-only{display:none;}
 
   @media print{
-    @page{ size:A4; margin:14mm 12mm; }
+    @page{size:A4;margin:14mm 12mm;}
     body{background:#fff;color:#000;padding:0;}
     .app{max-width:none;padding:0;}
     .no-print{display:none !important;}
     .print-only{display:block;}
-    .receipt{box-shadow:none;border:1px solid #999;background:#fff;break-inside:avoid;}
+    .receipt{border:1px solid #999;background:#fff;break-inside:avoid;}
     .receipt::after{display:none;}
-    .receipt .total, .receipt .eyebrow, .receipt .split div, .receipt .split div b{color:#000 !important;}
-    .card{box-shadow:none;border:1px solid #ccc;background:#fff;}
-    .supplier{box-shadow:none;border:1px solid #ccc;background:#fff;break-inside:avoid;margin-bottom:8px;}
+    .receipt .total,.receipt .eyebrow,.receipt .split div,.receipt .split div b{color:#000 !important;}
+    .supplier{border:1px solid #ccc;background:#fff;break-inside:avoid;margin-bottom:8px;}
     .supplier.excluded{display:none !important;}
-    .print-selected-summary{display:block !important;margin:0 0 16px;font-size:12px;color:#555;border:1px solid #ccc;border-radius:6px;padding:10px 12px;}
     .supplier-body{display:block !important;}
-    .supplier-head .name, .entry-row .a, .entry-row .d{color:#000 !important;}
-    h2, h2::before{color:#000 !important;background:#000 !important;}
-    .total, .amount, .month-row .amount{color:#000 !important;}
-    .month-row{color:#000;}
-    .print-header{display:block;margin-bottom:16px;}
+    .supplier-head .name,.entry-row .a,.entry-row .d{color:#000 !important;}
+    h2{color:#000 !important;}
+    h2::before{background:#000 !important;}
+    .amount,.month-row .amount{color:#000 !important;}
+    .print-header{margin-bottom:16px;}
     .print-header h1{font-size:20px;margin:0 0 4px;color:#000;}
     .print-header p{margin:0;color:#555;font-size:12px;}
+    .print-selected-summary{border:1px solid #ccc;border-radius:6px;padding:10px 12px;font-size:12px;color:#555;margin:0 0 16px;}
+    #supplierList2, #monthCard, .print-tools{display:none !important;}
+    #printReport{display:block;}
+    #printReport table{width:100%;border-collapse:collapse;font-size:11px;}
+    #printReport .sup-row td{padding:6px 4px;font-weight:700;background:#f0f0f0;border-top:1px solid #999;border-bottom:1px solid #999;}
+    #printReport .entry-tr td{padding:3px 4px;border-bottom:1px solid #e0e0e0;color:#222;}
+    #printReport .entry-tr .note{color:#777;font-size:10px;}
+    #printReport .amount-cell{text-align:left;white-space:nowrap;}
+    #printReport h3{font-size:13px;margin:18px 0 6px;color:#000;}
   }
 </style>
 </head>
@@ -172,9 +131,9 @@
   <header>
     <div>
       <h1>Kontantbok</h1>
-      <p>Registrer kontantbetalinger til leverandører – summeres automatisk</p>
+      <p>Registrer kontantbetalinger til leverandører</p>
     </div>
-    <button class="print-btn no-print" id="printBtn">🖨 Skriv ut</button>
+    <button type="button" class="print-btn no-print" id="printBtn">🖨 Skriv ut</button>
   </header>
 
   <div class="receipt">
@@ -228,6 +187,7 @@
       </span>
     </div>
     <div class="print-only print-selected-summary" id="printSelectedSummary"></div>
+    <div id="printReport" class="print-only"></div>
     <div id="supplierList2"></div>
   </section>
 
@@ -239,12 +199,12 @@
   <section class="no-print">
     <h2>Gamle data fra PC</h2>
     <div class="card">
-      <h3>1. Last ned malen</h3>
-      <p class="howto" style="margin:0 0 10px;">Åpne den på PC i Excel eller Numbers, slett eksempelraden, og fyll inn dine gamle betalinger – én rad per betaling.</p>
-      <button class="btn-ghost" id="downloadTemplateBtn" style="width:100%;margin-bottom:16px;">⬇ Last ned mal (Excel)</button>
-      <h3>2. Last opp filen igjen</h3>
-      <p class="howto" style="margin:0 0 10px;">Når malen er utfylt, last den opp her (.xlsx eller .csv) – alle rader legges automatisk til i appen.</p>
-      <button class="btn-ghost" id="importTemplateBtn" style="width:100%;">⬆ Last opp gammel data</button>
+      <h3 style="font-size:13px;margin:0 0 8px;">1. Last ned malen</h3>
+      <p style="font-size:13px;color:var(--ink-soft);margin:0 0 10px;">Fyll ut i Excel eller Numbers – én rad per betaling.</p>
+      <button type="button" class="btn-ghost" id="downloadTemplateBtn" style="width:100%;margin-bottom:16px;">⬇ Last ned mal (Excel)</button>
+      <h3 style="font-size:13px;margin:0 0 8px;">2. Last opp filen igjen</h3>
+      <p style="font-size:13px;color:var(--ink-soft);margin:0 0 10px;">.xlsx eller .csv – radene legges til automatisk.</p>
+      <button type="button" class="btn-ghost" id="importTemplateBtn" style="width:100%;">⬆ Last opp gammel data</button>
       <input type="file" id="importTemplateFile" accept=".xlsx,.xls,.csv">
       <div class="status-msg" id="importStatus"></div>
     </div>
@@ -253,48 +213,42 @@
   <section class="no-print">
     <h2>Sikkerhetskopi</h2>
     <div class="backup">
-      <button class="btn-ghost" id="exportBtn">Eksporter CSV</button>
-      <button class="btn-ghost" id="exportJsonBtn">Eksporter full kopi</button>
+      <button type="button" class="btn-ghost" id="exportBtn">Eksporter CSV</button>
+      <button type="button" class="btn-ghost" id="exportJsonBtn">Eksporter full kopi</button>
     </div>
     <div class="backup" style="margin-top:8px;">
-      <button class="btn-ghost" id="importBtn">Importer kopi (JSON)</button>
+      <button type="button" class="btn-ghost" id="importBtn">Importer kopi (JSON)</button>
       <input type="file" id="importFile" accept="application/json">
     </div>
   </section>
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
 <script>
-window.addEventListener('error', function(ev){
-  alert('Feil oppdaget: ' + ev.message + ' (linje ' + ev.lineno + ')');
-});
+'use strict';
+
+function main(){
+
 const KEY = 'kb_entries';
 let entries = [];
 let openSupplier = null;
-let printSelected = null; // Set of supplier names included in print; null = not yet initialized
-
+let printSelected = null;
 const monthsNo = ['januar','februar','mars','april','mai','juni','juli','august','september','oktober','november','desember'];
 
-async function loadEntries(){
+function loadEntries(){
   try{
     const raw = localStorage.getItem(KEY);
     entries = raw ? JSON.parse(raw) : [];
-  }catch(e){
-    entries = [];
-  }
+  }catch(e){ entries = []; }
 }
-async function saveEntries(){
-  try{
-    localStorage.setItem(KEY, JSON.stringify(entries));
-  }catch(e){
-    console.error('Kunne ikke lagre', e);
-    alert('Lagring feilet. Telefonens lagringsplass kan være full.');
-  }
+function saveEntries(){
+  try{ localStorage.setItem(KEY, JSON.stringify(entries)); }
+  catch(e){ alert('Lagring feilet: ' + e.message); }
 }
-
-function fmt(n){
-  return Math.round(n).toLocaleString('nb-NO');
-}
+function fmt(n){ return Math.round(n).toLocaleString('nb-NO'); }
+function formatDate(d){ const [y,m,day]=d.split('-'); return day+'.'+m+'.'+y; }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 function render(){
   const total = entries.reduce((s,e)=>s+Number(e.amount),0);
@@ -307,10 +261,7 @@ function render(){
   document.getElementById('undatedWarn').classList.toggle('show', undated.length>0);
 
   const bySupplier = {};
-  entries.forEach(e=>{
-    if(!bySupplier[e.supplier]) bySupplier[e.supplier] = [];
-    bySupplier[e.supplier].push(e);
-  });
+  entries.forEach(e=>{ (bySupplier[e.supplier] = bySupplier[e.supplier] || []).push(e); });
   const supplierNames = Object.keys(bySupplier).sort((a,b)=>{
     const ta = bySupplier[a].reduce((s,e)=>s+Number(e.amount),0);
     const tb = bySupplier[b].reduce((s,e)=>s+Number(e.amount),0);
@@ -318,62 +269,56 @@ function render(){
   });
   document.getElementById('countSuppliers').textContent = supplierNames.length;
 
-  // initialize / prune print selection to current supplier set
+  document.getElementById('supplierList').innerHTML =
+    supplierNames.map(n=>'<option value="'+escapeHtml(n)+'">').join('');
+
   if(printSelected===null){
     printSelected = new Set(supplierNames);
-  } else {
-    const pruned = new Set([...printSelected].filter(n=>supplierNames.includes(n)));
-    supplierNames.forEach(n=>{ if(!printSelected.has(n) && !pruned.has(n)) pruned.add(n); }); // new suppliers default to selected
-    printSelected = pruned;
+  }else{
+    // Only drop names of suppliers that no longer exist. Never re-add a name
+    // just because it's "missing" from the set — that was the bug: it made
+    // deliberate deselection (incl. "Ingen") get silently reverted.
+    printSelected = new Set([...printSelected].filter(n=>supplierNames.includes(n)));
   }
-
-  const dl = document.getElementById('supplierList');
-  dl.innerHTML = supplierNames.map(n=>`<option value="${escapeHtml(n)}">`).join('');
 
   const cont = document.getElementById('supplierList2');
   if(supplierNames.length===0){
     cont.innerHTML = '<div class="empty">Ingen betalinger registrert ennå</div>';
-  } else {
-    cont.innerHTML = supplierNames.map(name=>{
+  }else{
+    cont.innerHTML = supplierNames.map((name, idx)=>{
       const list = bySupplier[name].slice().sort((a,b)=>(b.date||'0').localeCompare(a.date||'0'));
       const sTotal = list.reduce((s,e)=>s+Number(e.amount),0);
       const isOpen = openSupplier===name;
       const isChecked = printSelected.has(name);
-      const rows = list.map(e=>`
-        <div class="entry-row">
-          <div>
-            <span class="d">${e.date ? formatDate(e.date) : 'Uten dato'}</span>
-            ${e.note ? `<span class="note">${escapeHtml(e.note)}</span>` : ''}
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span class="a num">${fmt(e.amount)} kr</span>
-            <button class="btn-danger-text no-print" onclick="deleteEntry('${e.id}')">Slett</button>
-          </div>
-        </div>`).join('');
-      return `
-        <div class="supplier ${isChecked?'':'excluded'}">
-          <div class="supplier-head">
-            <input type="checkbox" class="print-check no-print check" ${isChecked?'checked':''} onclick="event.stopPropagation(); togglePrintSelect('${escapeAttr(name)}')">
-            <div style="flex:1;cursor:pointer;" onclick="toggleSupplier('${escapeAttr(name)}')">
-              <div class="name">${escapeHtml(name)}</div>
-              <div class="meta">${list.length} betaling(er)</div>
-            </div>
-            <div class="amount num" style="cursor:pointer;" onclick="toggleSupplier('${escapeAttr(name)}')">${fmt(sTotal)} kr</div>
-          </div>
-          <div class="supplier-body ${isOpen?'open':''}">${rows}</div>
-        </div>`;
+      const rows = list.map(e=>
+        '<div class="entry-row">'
+        +'<div><span class="d">'+(e.date?formatDate(e.date):'Uten dato')+'</span>'
+        +(e.note?'<span class="note">'+escapeHtml(e.note)+'</span>':'')+'</div>'
+        +'<div style="display:flex;align-items:center;gap:8px;">'
+        +'<span class="a num">'+fmt(e.amount)+' kr</span>'
+        +'<button type="button" class="btn-danger-text no-print" data-action="delete" data-id="'+e.id+'">Slett</button>'
+        +'</div></div>'
+      ).join('');
+      return '<div class="supplier '+(isChecked?'':'excluded')+'" data-supplier-card="'+idx+'">'
+        +'<div class="supplier-head">'
+        +'<input type="checkbox" class="print-check no-print" data-action="print-toggle" data-name="'+escapeHtml(name)+'" '+(isChecked?'checked':'')+'>'
+        +'<div class="toggle-area" data-action="expand" data-name="'+escapeHtml(name)+'">'
+        +'<div class="name">'+escapeHtml(name)+'</div>'
+        +'<div class="meta">'+list.length+' betaling(er)</div>'
+        +'</div>'
+        +'<div class="amount num">'+fmt(sTotal)+' kr</div>'
+        +'</div>'
+        +'<div class="supplier-body '+(isOpen?'open':'')+'">'+rows+'</div>'
+        +'</div>';
     }).join('');
   }
 
-  // print-only summary reflecting current selection
   const selectedEntries = entries.filter(e=>printSelected.has(e.supplier));
   const selectedTotal = selectedEntries.reduce((s,e)=>s+Number(e.amount),0);
   const summaryEl = document.getElementById('printSelectedSummary');
-  if(printSelected.size===supplierNames.length){
-    summaryEl.textContent = `Utskrift: alle leverandører – sum ${fmt(selectedTotal)} kr`;
-  } else {
-    summaryEl.textContent = `Utskrift: ${printSelected.size} av ${supplierNames.length} leverandører valgt – sum ${fmt(selectedTotal)} kr`;
-  }
+  summaryEl.textContent = printSelected.size===supplierNames.length
+    ? 'Utskrift: alle leverandører – sum ' + fmt(selectedTotal) + ' kr'
+    : 'Utskrift: ' + printSelected.size + ' av ' + supplierNames.length + ' leverandører valgt – sum ' + fmt(selectedTotal) + ' kr';
 
   const byMonth = {};
   entries.filter(e=>e.date).forEach(e=>{
@@ -382,64 +327,108 @@ function render(){
   });
   const monthKeys = Object.keys(byMonth).sort().reverse();
   const monthCard = document.getElementById('monthCard');
-  if(monthKeys.length===0){
-    monthCard.innerHTML = '<div class="empty">Ingen betalinger med kjent dato ennå</div>';
-  } else {
-    monthCard.innerHTML = monthKeys.map(k=>{
-      const [y,m] = k.split('-');
-      const label = monthsNo[parseInt(m,10)-1] + ' ' + y;
-      return `<div class="month-row"><span>${label}</span><span class="amount num">${fmt(byMonth[k])} kr</span></div>`;
-    }).join('');
+  monthCard.innerHTML = monthKeys.length===0
+    ? '<div class="empty">Ingen betalinger med kjent dato ennå</div>'
+    : monthKeys.map(k=>{
+        const [y,m] = k.split('-');
+        return '<div class="month-row"><span>'+monthsNo[parseInt(m,10)-1]+' '+y+'</span><span class="amount num">'+fmt(byMonth[k])+' kr</span></div>';
+      }).join('');
+}
+
+// --- Event delegation: one listener handles all supplier-list clicks, robust against re-render ---
+document.getElementById('supplierList2').addEventListener('click', function(e){
+  const target = e.target.closest('[data-action]');
+  if(!target) return;
+  const action = target.dataset.action;
+  if(action==='expand'){
+    const name = target.dataset.name;
+    openSupplier = (openSupplier===name) ? null : name;
+    render();
+  }else if(action==='print-toggle'){
+    const name = target.dataset.name;
+    if(printSelected.has(name)) printSelected.delete(name); else printSelected.add(name);
+    render();
+  }else if(action==='delete'){
+    const id = target.dataset.id;
+    if(confirm('Slette denne betalingen?')){
+      entries = entries.filter(x=>x.id!==id);
+      saveEntries();
+      render();
+    }
   }
-}
-
-function formatDate(d){
-  const [y,m,day] = d.split('-');
-  return `${day}.${m}.${y}`;
-}
-function escapeHtml(s){
-  return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-function escapeAttr(s){ return s.replace(/'/g,"\\'"); }
-
-window.toggleSupplier = function(name){
-  openSupplier = openSupplier===name ? null : name;
-  render();
-};
-
-window.togglePrintSelect = function(name){
-  if(printSelected.has(name)) printSelected.delete(name);
-  else printSelected.add(name);
-  render();
-};
-
-document.getElementById('selectAllBtn').addEventListener('click', ()=>{
-  try{
-    printSelected = new Set(Object.keys(entries.reduce((acc,e)=>{acc[e.supplier]=1;return acc;},{})));
-    render();
-  }catch(err){ alert('Feil i Velg alle: ' + err.message); }
-});
-document.getElementById('selectNoneBtn').addEventListener('click', ()=>{
-  try{
-    printSelected = new Set();
-    render();
-  }catch(err){ alert('Feil i Ingen: ' + err.message); }
 });
 
-window.deleteEntry = async function(id){
-  if(!confirm('Slette denne betalingen?')) return;
-  entries = entries.filter(e=>e.id!==id);
-  await saveEntries();
+document.getElementById('selectAllBtn').addEventListener('click', function(){
+  const names = {}; entries.forEach(e=>names[e.supplier]=1);
+  printSelected = new Set(Object.keys(names));
   render();
-};
+});
+document.getElementById('selectNoneBtn').addEventListener('click', function(){
+  printSelected = new Set();
+  render();
+});
+function buildPrintReport(){
+  const bySupplier = {};
+  entries.forEach(e=>{ (bySupplier[e.supplier] = bySupplier[e.supplier] || []).push(e); });
+  const selectedNames = Object.keys(bySupplier)
+    .filter(n=>printSelected.has(n))
+    .sort((a,b)=>{
+      const ta = bySupplier[a].reduce((s,e)=>s+Number(e.amount),0);
+      const tb = bySupplier[b].reduce((s,e)=>s+Number(e.amount),0);
+      return tb-ta;
+    });
 
-document.getElementById('noDate').addEventListener('change', (e)=>{
-  const dateInput = document.getElementById('date');
-  dateInput.disabled = e.target.checked;
-  if(e.target.checked) dateInput.value = '';
+  let html = '<table>';
+  selectedNames.forEach(name=>{
+    const list = bySupplier[name].slice().sort((a,b)=>(b.date||'0').localeCompare(a.date||'0'));
+    const sTotal = list.reduce((s,e)=>s+Number(e.amount),0);
+    html += '<tr class="sup-row"><td colspan="2">'+escapeHtml(name)+'</td><td class="amount-cell">'+fmt(sTotal)+' kr</td></tr>';
+    list.forEach(e=>{
+      html += '<tr class="entry-tr">'
+        +'<td style="width:80px;">'+(e.date?formatDate(e.date):'Uten dato')+'</td>'
+        +'<td class="note">'+(e.note?escapeHtml(e.note):'')+'</td>'
+        +'<td class="amount-cell">'+fmt(e.amount)+' kr</td>'
+        +'</tr>';
+    });
+  });
+  html += '</table>';
+
+  // monthly breakdown for the selected suppliers only
+  const selEntries = entries.filter(e=>printSelected.has(e.supplier) && e.date);
+  const byMonth = {};
+  selEntries.forEach(e=>{ const k=e.date.slice(0,7); byMonth[k]=(byMonth[k]||0)+Number(e.amount); });
+  const monthKeys = Object.keys(byMonth).sort().reverse();
+  if(monthKeys.length){
+    html += '<h3>Per måned (valgte leverandører)</h3><table>';
+    monthKeys.forEach(k=>{
+      const [y,m] = k.split('-');
+      html += '<tr class="entry-tr"><td colspan="2">'+monthsNo[parseInt(m,10)-1]+' '+y+'</td><td class="amount-cell">'+fmt(byMonth[k])+' kr</td></tr>';
+    });
+    html += '</table>';
+  }
+
+  document.getElementById('printReport').innerHTML = html;
+
+  const selectedTotal = selectedNames.reduce((s,n)=>s+bySupplier[n].reduce((s2,e)=>s2+Number(e.amount),0),0);
+  const allCount = Object.keys(bySupplier).length;
+  const summaryEl = document.getElementById('printSelectedSummary');
+  summaryEl.textContent = printSelected.size===allCount
+    ? 'Utskrift: alle leverandører – sum ' + fmt(selectedTotal) + ' kr'
+    : 'Utskrift: ' + selectedNames.length + ' av ' + allCount + ' leverandører valgt – sum ' + fmt(selectedTotal) + ' kr';
+}
+
+document.getElementById('printBtn').addEventListener('click', function(){
+  buildPrintReport();
+  window.print();
 });
 
-document.getElementById('addForm').addEventListener('submit', async (e)=>{
+document.getElementById('noDate').addEventListener('change', function(e){
+  const d = document.getElementById('date');
+  d.disabled = e.target.checked;
+  if(e.target.checked) d.value='';
+});
+
+document.getElementById('addForm').addEventListener('submit', function(e){
   e.preventDefault();
   const supplier = document.getElementById('supplier').value.trim();
   const amount = document.getElementById('amount').value;
@@ -447,35 +436,22 @@ document.getElementById('addForm').addEventListener('submit', async (e)=>{
   const date = noDate ? '' : document.getElementById('date').value;
   const note = document.getElementById('note').value.trim();
   if(!supplier || !amount || Number(amount)<=0) return;
-
-  entries.push({
-    id: Date.now().toString(36)+Math.random().toString(36).slice(2,7),
-    supplier, amount: Number(amount), date, note
-  });
-  await saveEntries();
+  entries.push({id: Date.now().toString(36)+Math.random().toString(36).slice(2,7), supplier, amount:Number(amount), date, note});
+  if(printSelected) printSelected.add(supplier);
+  saveEntries();
   e.target.reset();
   document.getElementById('date').disabled = false;
   render();
 });
 
-document.getElementById('printBtn').addEventListener('click', ()=>{
-  try{
-    window.print();
-  }catch(err){ alert('Feil ved utskrift: ' + err.message); }
-});
-
-document.getElementById('exportBtn').addEventListener('click', ()=>{
+document.getElementById('exportBtn').addEventListener('click', function(){
   let csv = 'Leverandor;Belop;Dato;Notat\n';
-  entries.forEach(e=>{
-    csv += `${e.supplier};${e.amount};${e.date||''};${(e.note||'').replace(/;/g,',')}\n`;
-  });
+  entries.forEach(e=>{ csv += e.supplier+';'+e.amount+';'+(e.date||'')+';'+(e.note||'').replace(/;/g,',')+'\n'; });
   downloadFile(csv, 'leverandorbetalinger.csv', 'text/csv;charset=utf-8;');
 });
-
-document.getElementById('exportJsonBtn').addEventListener('click', ()=>{
+document.getElementById('exportJsonBtn').addEventListener('click', function(){
   downloadFile(JSON.stringify(entries,null,2), 'kontantbok-sikkerhetskopi.json', 'application/json');
 });
-
 function downloadFile(content, filename, type){
   const blob = new Blob(['\ufeff'+content], {type});
   const url = URL.createObjectURL(blob);
@@ -485,136 +461,123 @@ function downloadFile(content, filename, type){
   URL.revokeObjectURL(url);
 }
 
-// --- JSON backup import ---
-document.getElementById('importBtn').addEventListener('click', ()=>{
+document.getElementById('importBtn').addEventListener('click', function(){
   document.getElementById('importFile').click();
 });
-document.getElementById('importFile').addEventListener('change', (e)=>{
+document.getElementById('importFile').addEventListener('change', function(e){
   const file = e.target.files[0];
   if(!file) return;
   const reader = new FileReader();
-  reader.onload = async (ev)=>{
+  reader.onload = function(ev){
     try{
       const imported = JSON.parse(ev.target.result);
       if(!Array.isArray(imported)) throw new Error('Ugyldig format');
-      if(confirm(`${imported.length} betaling(er) vil bli lagt til i gjeldende register. Fortsette?`)){
+      if(confirm(imported.length+' betaling(er) vil bli lagt til. Fortsette?')){
         entries = entries.concat(imported);
-        await saveEntries();
+        if(printSelected) imported.forEach(x=>printSelected.add(x.supplier));
+        saveEntries();
         render();
       }
-    }catch(err){
-      alert('Kunne ikke lese filen. Sjekk at det er en gyldig sikkerhetskopi.');
-    }
+    }catch(err){ alert('Kunne ikke lese filen.'); }
   };
   reader.readAsText(file);
-  e.target.value = '';
+  e.target.value='';
 });
 
-// --- Excel/CSV template download ---
-document.getElementById('downloadTemplateBtn').addEventListener('click', ()=>{
+document.getElementById('downloadTemplateBtn').addEventListener('click', function(){
+  if(typeof XLSX==='undefined'){ alert('Malverktøyet lastes fortsatt inn, prøv igjen om et par sekunder.'); return; }
   const wb = XLSX.utils.book_new();
   const data = [
-    ["Leverandør","Beløp (kr)","Dato (DD.MM.ÅÅÅÅ)","Notat"],
-    ["Eksempel: Grønnsakleverandør AS", 2500, "15.06.2025", "Slett denne raden før utfylling"]
+    ['Leverandør','Beløp (kr)','Dato (DD.MM.ÅÅÅÅ)','Notat'],
+    ['Eksempel: Grønnsakleverandør AS', 2500, '15.06.2025', 'Slett denne raden før utfylling']
   ];
   const ws = XLSX.utils.aoa_to_sheet(data);
   ws['!cols'] = [{wch:30},{wch:14},{wch:20},{wch:40}];
-  XLSX.utils.book_append_sheet(wb, ws, "Betalinger");
-  XLSX.writeFile(wb, "mal-kontantbok.xlsx");
+  XLSX.utils.book_append_sheet(wb, ws, 'Betalinger');
+  XLSX.writeFile(wb, 'mal-kontantbok.xlsx');
 });
 
-// --- Excel/CSV template import ---
-document.getElementById('importTemplateBtn').addEventListener('click', ()=>{
+document.getElementById('importTemplateBtn').addEventListener('click', function(){
   document.getElementById('importTemplateFile').click();
 });
-
 function parseDateCell(val){
-  if(val===undefined || val===null || val==='') return '';
+  if(val===undefined||val===null||val==='') return '';
   if(val instanceof Date && !isNaN(val)){
     const y=val.getFullYear(), m=String(val.getMonth()+1).padStart(2,'0'), d=String(val.getDate()).padStart(2,'0');
-    return `${y}-${m}-${d}`;
+    return y+'-'+m+'-'+d;
   }
   const s = String(val).trim();
   let m = s.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/);
-  if(m){
-    return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
-  }
+  if(m) return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
   m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-  if(m){
-    return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
-  }
+  if(m) return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
   return '';
 }
-
-document.getElementById('importTemplateFile').addEventListener('change', (e)=>{
+document.getElementById('importTemplateFile').addEventListener('change', function(e){
   const file = e.target.files[0];
   if(!file) return;
   const statusEl = document.getElementById('importStatus');
   statusEl.className = 'status-msg show';
   statusEl.textContent = 'Leser filen...';
-
   const reader = new FileReader();
-  reader.onload = async (ev)=>{
+  reader.onload = function(ev){
     try{
+      if(typeof XLSX==='undefined') throw new Error('Malverktøyet er ikke klart ennå');
       const data = new Uint8Array(ev.target.result);
       const wb = XLSX.read(data, {type:'array', cellDates:true});
       const sheet = wb.Sheets[wb.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(sheet, {header:1, raw:true, defval:''});
-
       const newEntries = [];
       let skipped = 0;
-      for(let i=1; i<rows.length; i++){ // skip header row
+      for(let i=1;i<rows.length;i++){
         const row = rows[i];
         if(!row || row.length===0) continue;
         const supplier = String(row[0]||'').trim();
-        const amountRaw = row[1];
-        const dateRaw = row[2];
-        const note = String(row[3]||'').trim();
-
-        if(!supplier || supplier.toLowerCase().startsWith('eksempel')) { continue; }
-        const amount = Number(String(amountRaw).replace(',', '.').replace(/\s/g,''));
+        if(!supplier || supplier.toLowerCase().startsWith('eksempel')) continue;
+        const amount = Number(String(row[1]).replace(',', '.').replace(/\s/g,''));
         if(!amount || amount<=0){ skipped++; continue; }
-
-        newEntries.push({
-          id: Date.now().toString(36)+Math.random().toString(36).slice(2,7)+i,
-          supplier, amount, date: parseDateCell(dateRaw), note
-        });
+        newEntries.push({id: Date.now().toString(36)+Math.random().toString(36).slice(2,7)+i, supplier, amount, date: parseDateCell(row[2]), note: String(row[3]||'').trim()});
       }
-
       if(newEntries.length===0){
-        statusEl.className = 'status-msg show err';
-        statusEl.textContent = 'Fant ingen gyldige rader i filen. Sjekk at beløp-kolonnen er fylt ut.';
+        statusEl.className='status-msg show err';
+        statusEl.textContent='Fant ingen gyldige rader. Sjekk at beløp-kolonnen er fylt ut.';
         return;
       }
-
-      if(confirm(`${newEntries.length} betaling(er) funnet${skipped?` (${skipped} rader hoppet over pga. manglende beløp)`:''}. Legge til i Kontantbok?`)){
+      if(confirm(newEntries.length+' betaling(er) funnet'+(skipped?' ('+skipped+' rader hoppet over)':'')+'. Legge til?')){
         entries = entries.concat(newEntries);
-        await saveEntries();
+        if(printSelected) newEntries.forEach(x=>printSelected.add(x.supplier));
+        saveEntries();
         render();
-        statusEl.className = 'status-msg show';
-        statusEl.textContent = `✓ ${newEntries.length} betaling(er) lagt til.`;
-      } else {
-        statusEl.className = 'status-msg';
+        statusEl.className='status-msg show';
+        statusEl.textContent='✓ '+newEntries.length+' betaling(er) lagt til.';
+      }else{
+        statusEl.className='status-msg';
       }
     }catch(err){
-      statusEl.className = 'status-msg show err';
-      statusEl.textContent = 'Kunne ikke lese filen. Sjekk at det er en gyldig Excel- eller CSV-fil.';
+      statusEl.className='status-msg show err';
+      statusEl.textContent='Kunne ikke lese filen: ' + err.message;
     }
   };
   reader.readAsArrayBuffer(file);
-  e.target.value = '';
+  e.target.value='';
 });
 
-(async function init(){
-  document.getElementById('printDate').textContent = 'Skrevet ut: ' + new Date().toLocaleDateString('nb-NO');
-  await loadEntries();
-  render();
-})();
+document.getElementById('printDate').textContent = 'Skrevet ut: ' + new Date().toLocaleDateString('nb-NO');
+loadEntries();
+render();
 
 if('serviceWorker' in navigator){
-  window.addEventListener('load', ()=>{
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
   });
+}
+
+} // end main
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded', main);
+}else{
+  main();
 }
 </script>
 </body>
