@@ -265,6 +265,9 @@
 </div>
 
 <script>
+window.addEventListener('error', function(ev){
+  alert('Feil oppdaget: ' + ev.message + ' (linje ' + ev.lineno + ')');
+});
 const KEY = 'kb_entries';
 let entries = [];
 let openSupplier = null;
@@ -411,12 +414,16 @@ window.togglePrintSelect = function(name){
 };
 
 document.getElementById('selectAllBtn').addEventListener('click', ()=>{
-  printSelected = new Set(Object.keys(entries.reduce((acc,e)=>{acc[e.supplier]=1;return acc;},{})));
-  render();
+  try{
+    printSelected = new Set(Object.keys(entries.reduce((acc,e)=>{acc[e.supplier]=1;return acc;},{})));
+    render();
+  }catch(err){ alert('Feil i Velg alle: ' + err.message); }
 });
 document.getElementById('selectNoneBtn').addEventListener('click', ()=>{
-  printSelected = new Set();
-  render();
+  try{
+    printSelected = new Set();
+    render();
+  }catch(err){ alert('Feil i Ingen: ' + err.message); }
 });
 
 window.deleteEntry = async function(id){
@@ -452,7 +459,9 @@ document.getElementById('addForm').addEventListener('submit', async (e)=>{
 });
 
 document.getElementById('printBtn').addEventListener('click', ()=>{
-  window.print();
+  try{
+    window.print();
+  }catch(err){ alert('Feil ved utskrift: ' + err.message); }
 });
 
 document.getElementById('exportBtn').addEventListener('click', ()=>{
