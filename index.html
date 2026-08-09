@@ -148,7 +148,7 @@
   </div>
 
   <section class="no-print">
-    <h2>Legg til betaling</h2>
+    <h2 id="formTitle">Legg til betaling</h2>
     <form class="card" id="addForm">
       <div>
         <label for="supplier">Leverandørnavn</label>
@@ -173,7 +173,8 @@
         <label for="note">Notat (valgfritt)</label>
         <input type="text" id="note" placeholder="F.eks. delbetaling på juni-faktura">
       </div>
-      <button type="submit" class="btn-primary">Legg til betaling</button>
+      <button type="submit" class="btn-primary" id="submitBtn">Legg til betaling</button>
+      <button type="button" class="btn-ghost" id="cancelEditBtn" style="display:none;">Avbryt redigering</button>
     </form>
   </section>
 
@@ -185,6 +186,20 @@
         <button type="button" id="selectAllBtn">Velg alle</button>
         <button type="button" id="selectNoneBtn">Ingen</button>
       </span>
+    </div>
+    <div class="card no-print" style="margin-bottom:14px;">
+      <label style="margin-bottom:8px;">Periode for utskrift (valgfritt)</label>
+      <div class="row2">
+        <div>
+          <label for="printFrom" style="font-size:12px;">Fra dato</label>
+          <input type="date" id="printFrom">
+        </div>
+        <div>
+          <label for="printTo" style="font-size:12px;">Til dato</label>
+          <input type="date" id="printTo">
+        </div>
+      </div>
+      <button type="button" class="btn-ghost" id="clearPeriodBtn" style="width:100%;margin-top:10px;">Nullstill periode</button>
     </div>
     <div class="print-only print-selected-summary" id="printSelectedSummary"></div>
     <div id="printReport" class="print-only"></div>
@@ -296,6 +311,7 @@ function render(){
         +(e.note?'<span class="note">'+escapeHtml(e.note)+'</span>':'')+'</div>'
         +'<div style="display:flex;align-items:center;gap:8px;">'
         +'<span class="a num">'+fmt(e.amount)+' kr</span>'
+        +'<button type="button" class="btn-danger-text no-print" data-action="edit" data-id="'+e.id+'" style="color:var(--pine);">Rediger</button>'
         +'<button type="button" class="btn-danger-text no-print" data-action="delete" data-id="'+e.id+'">Slett</button>'
         +'</div></div>'
       ).join('');
@@ -355,8 +371,45 @@ document.getElementById('supplierList2').addEventListener('click', function(e){
       saveEntries();
       render();
     }
+  }else if(action==='edit'){
+    const id = target.dataset.id;
+    startEdit(id);
   }
 });
+
+let editingId = null;
+function startEdit(id){
+  const entry = entries.find(x=>x.id===id);
+  if(!entry) return;
+  editingId = id;
+  document.getElementById('supplier').value = entry.supplier;
+  document.getElementById('amount').value = entry.amount;
+  document.getElementById('note').value = entry.note || '';
+  const noDateBox = document.getElementById('noDate');
+  const dateInput = document.getElementById('date');
+  if(entry.date){
+    noDateBox.checked = false;
+    dateInput.disabled = false;
+    dateInput.value = entry.date;
+  }else{
+    noDateBox.checked = true;
+    dateInput.disabled = true;
+    dateInput.value = '';
+  }
+  document.getElementById('formTitle').textContent = 'Rediger betaling';
+  document.getElementById('submitBtn').textContent = 'Oppdater betaling';
+  document.getElementById('cancelEditBtn').style.display = 'block';
+  document.getElementById('addForm').scrollIntoView({behavior:'smooth', block:'start'});
+}
+function stopEdit(){
+  editingId = null;
+  document.getElementById('addForm').reset();
+  document.getElementById('date').disabled = false;
+  document.getElementById('formTitle').textContent = 'Legg til betaling';
+  document.getElementById('submitBtn').textContent = 'Legg til betaling';
+  document.getElementById('cancelEditBtn').style.display = 'none';
+}
+document.getElementById('cancelEditBtn').addEventListener('click', stopEdit);
 
 document.getElementById('selectAllBtn').addEventListener('click', function(){
   const names = {}; entries.forEach(e=>names[e.supplier]=1);
@@ -368,8 +421,20 @@ document.getElementById('selectNoneBtn').addEventListener('click', function(){
   render();
 });
 function buildPrintReport(){
+  const fromDate = document.getElementById('printFrom').value;
+  const toDate = document.getElementById('printTo').value;
+  const hasRange = !!(fromDate || toDate);
+
+  const inRange = (e)=>{
+    if(!hasRange) return true;
+    if(!e.date) return false; // can't place undated entries in a specific period
+    if(fromDate && e.date < fromDate) return false;
+    if(toDate && e.date > toDate) return false;
+    return true;
+  };
+
   const bySupplier = {};
-  entries.forEach(e=>{ (bySupplier[e.supplier] = bySupplier[e.supplier] || []).push(e); });
+  entries.filter(inRange).forEach(e=>{ (bySupplier[e.supplier] = bySupplier[e.supplier] || []).push(e); });
   const selectedNames = Object.keys(bySupplier)
     .filter(n=>printSelected.has(n))
     .sort((a,b)=>{
@@ -391,10 +456,10 @@ function buildPrintReport(){
         +'</tr>';
     });
   });
-  html += '</table>';
+  html += selectedNames.length ? '</table>' : '</table><p style="font-size:12px;color:#777;">Ingen betalinger i valgt periode.</p>';
 
-  // monthly breakdown for the selected suppliers only
-  const selEntries = entries.filter(e=>printSelected.has(e.supplier) && e.date);
+  // monthly breakdown for the selected suppliers only, within the same period
+  const selEntries = entries.filter(e=>printSelected.has(e.supplier) && e.date).filter(inRange);
   const byMonth = {};
   selEntries.forEach(e=>{ const k=e.date.slice(0,7); byMonth[k]=(byMonth[k]||0)+Number(e.amount); });
   const monthKeys = Object.keys(byMonth).sort().reverse();
@@ -409,12 +474,15 @@ function buildPrintReport(){
 
   document.getElementById('printReport').innerHTML = html;
 
+  const periodLabel = hasRange
+    ? ' – periode: ' + (fromDate?formatDate(fromDate):'start') + ' til ' + (toDate?formatDate(toDate):'i dag')
+    : '';
   const selectedTotal = selectedNames.reduce((s,n)=>s+bySupplier[n].reduce((s2,e)=>s2+Number(e.amount),0),0);
   const allCount = Object.keys(bySupplier).length;
   const summaryEl = document.getElementById('printSelectedSummary');
-  summaryEl.textContent = printSelected.size===allCount
+  summaryEl.textContent = (printSelected.size===allCount
     ? 'Utskrift: alle leverandører – sum ' + fmt(selectedTotal) + ' kr'
-    : 'Utskrift: ' + selectedNames.length + ' av ' + allCount + ' leverandører valgt – sum ' + fmt(selectedTotal) + ' kr';
+    : 'Utskrift: ' + selectedNames.length + ' av ' + allCount + ' leverandører valgt – sum ' + fmt(selectedTotal) + ' kr') + periodLabel;
 }
 
 document.getElementById('printBtn').addEventListener('click', function(){
@@ -436,6 +504,22 @@ document.getElementById('addForm').addEventListener('submit', function(e){
   const date = noDate ? '' : document.getElementById('date').value;
   const note = document.getElementById('note').value.trim();
   if(!supplier || !amount || Number(amount)<=0) return;
+
+  if(editingId){
+    const entry = entries.find(x=>x.id===editingId);
+    if(entry){
+      entry.supplier = supplier;
+      entry.amount = Number(amount);
+      entry.date = date;
+      entry.note = note;
+    }
+    if(printSelected) printSelected.add(supplier);
+    saveEntries();
+    stopEdit();
+    render();
+    return;
+  }
+
   entries.push({id: Date.now().toString(36)+Math.random().toString(36).slice(2,7), supplier, amount:Number(amount), date, note});
   if(printSelected) printSelected.add(supplier);
   saveEntries();
